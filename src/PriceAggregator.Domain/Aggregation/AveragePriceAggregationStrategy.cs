@@ -2,7 +2,7 @@ namespace PriceAggregator.Domain.Aggregation;
 
 public sealed class AveragePriceAggregationStrategy : IPriceAggregationStrategy
 {
-    public double Aggregate(IReadOnlyCollection<SourcePrice> prices)
+    public decimal Aggregate(IReadOnlyCollection<SourcePrice> prices)
     {
         ArgumentNullException.ThrowIfNull(prices);
         if (prices.Count == 0)

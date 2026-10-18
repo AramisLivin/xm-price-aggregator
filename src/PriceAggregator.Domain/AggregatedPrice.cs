@@ -2,7 +2,7 @@ namespace PriceAggregator.Domain;
 
 public sealed class AggregatedPrice
 {
-    public AggregatedPrice(Instrument instrument, HourlyTimestamp timestamp, double price, IReadOnlyList<SourcePrice> sources)
+    public AggregatedPrice(Instrument instrument, HourlyTimestamp timestamp, decimal price, IReadOnlyList<SourcePrice> sources)
     {
         ArgumentNullException.ThrowIfNull(instrument);
         ArgumentNullException.ThrowIfNull(sources);
@@ -11,9 +11,9 @@ public sealed class AggregatedPrice
             throw new ArgumentException("At least one price is required", nameof(sources));
         }
 
-        if (!double.IsFinite(price) || price <= 0)
+        if (price <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(price), price, "Price must be positive and finite");
+            throw new ArgumentOutOfRangeException(nameof(price), price, "Price must be positive");
         }
 
         Instrument = instrument;
@@ -26,7 +26,7 @@ public sealed class AggregatedPrice
 
     public HourlyTimestamp Timestamp { get; }
 
-    public double Price { get; }
+    public decimal Price { get; }
 
     public IReadOnlyList<SourcePrice> Sources { get; }
 }

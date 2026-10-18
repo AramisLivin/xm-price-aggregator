@@ -2,12 +2,12 @@ namespace PriceAggregator.Domain;
 
 public sealed record SourcePrice
 {
-    public SourcePrice(string source, double price)
+    public SourcePrice(string source, decimal price)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
-        if (!double.IsFinite(price) || price <= 0)
+        if (price <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(price), price, "Price must be positive and finite");
+            throw new ArgumentOutOfRangeException(nameof(price), price, "Price must be positive");
         }
 
         Source = source;
@@ -16,5 +16,5 @@ public sealed record SourcePrice
 
     public string Source { get; }
 
-    public double Price { get; }
+    public decimal Price { get; }
 }

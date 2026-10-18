@@ -6,5 +6,5 @@ public interface IPriceSource
 {
     string Name { get; }
 
-    Task<double?> GetClosePriceAsync(Instrument instrument, HourlyTimestamp timestamp, CancellationToken cancellationToken);
+    Task<decimal?> GetClosePriceAsync(Instrument instrument, HourlyTimestamp timestamp, CancellationToken cancellationToken);
 }
