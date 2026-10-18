@@ -1,0 +1,50 @@
+<div class="row g-2">
+    <div class="col-7">
+        <label class="form-label" for="@DateId">@Label (UTC date)</label>
+        <input id="@DateId"
+               type="date"
+               class="form-control"
+               value="@Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)"
+               @onchange="OnDateChangedAsync" />
+    </div>
+    <div class="col-5">
+        <label class="form-label" for="@HourId">Hour (UTC)</label>
+        <select id="@HourId" class="form-select" value="@Value.Hour" @onchange="OnHourChangedAsync">
+            @for (var hour = 0; hour < 24; hour++)
+            {
+                <option value="@hour">@hour.ToString("00", CultureInfo.InvariantCulture):00</option>
+            }
+        </select>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = string.Empty;
+
+    [Parameter]
+    public DateTimeOffset Value { get; set; }
+
+    [Parameter]
+    public EventCallback<DateTimeOffset> ValueChanged { get; set; }
+
+    private string DateId => $"{Id}-date";
+
+    private string HourId => $"{Id}-hour";
+
+    private Task OnDateChangedAsync(ChangeEventArgs e) =>
+        DateOnly.TryParseExact(e.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+            ? ValueChanged.InvokeAsync(Compose(date, Value.Hour))
+            : Task.CompletedTask;
+
+    private Task OnHourChangedAsync(ChangeEventArgs e) =>
+        int.TryParse(e.Value?.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var hour) && hour is >= 0 and < 24
+            ? ValueChanged.InvokeAsync(Compose(DateOnly.FromDateTime(Value.UtcDateTime), hour))
+            : Task.CompletedTask;
+
+    private static DateTimeOffset Compose(DateOnly date, int hour) =>
+        new(date.ToDateTime(new TimeOnly(hour, 0)), TimeSpan.Zero);
+}

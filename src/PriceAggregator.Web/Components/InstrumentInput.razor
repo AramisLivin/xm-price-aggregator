@@ -1,0 +1,51 @@
+@inject PriceApiClient Api
+
+<label class="form-label" for="@Id">Instrument</label>
+<input id="@Id"
+       class="form-control"
+       list="@OptionsId"
+       value="@Value"
+       @oninput="OnInputAsync"
+       placeholder="e.g. BTC/USD"
+       autocomplete="off" />
+<datalist id="@OptionsId">
+    @foreach (var instrument in _instruments)
+    {
+        <option value="@instrument"></option>
+    }
+</datalist>
+@if (_loadFailed)
+{
+    <div class="form-text text-warning">Could not load instruments, you can still type one</div>
+}
+
+@code {
+    private IReadOnlyList<string> _instruments = [];
+    private bool _loadFailed;
+
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private string OptionsId => $"{Id}-options";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Api.GetInstrumentsAsync();
+        if (result.IsSuccess)
+        {
+            _instruments = result.Value.Instruments;
+        }
+        else
+        {
+            _loadFailed = true;
+        }
+    }
+
+    private Task OnInputAsync(ChangeEventArgs e) => ValueChanged.InvokeAsync(e.Value?.ToString() ?? string.Empty);
+}

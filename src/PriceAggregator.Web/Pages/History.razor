@@ -1,0 +1,137 @@
+@page "/history"
+@inject PriceApiClient Api
+
+<PageTitle>Price history</PageTitle>
+
+<h1>Price history</h1>
+<p class="text-body-secondary">
+    Aggregated prices already persisted in the datastore. Prices are saved when they are looked up.
+</p>
+
+<form class="card card-body mb-4" @onsubmit="SubmitAsync">
+    <div class="row g-3 align-items-end">
+        <div class="col-xl-3">
+            <InstrumentInput Id="history-instrument" @bind-Value="_instrument" />
+        </div>
+        <div class="col-xl-4">
+            <UtcHourInput Id="history-from" Label="From" @bind-Value="_from" />
+        </div>
+        <div class="col-xl-4">
+            <UtcHourInput Id="history-to" Label="To" @bind-Value="_to" />
+        </div>
+        <div class="col-xl-1 d-grid">
+            <button type="submit" class="btn btn-primary" disabled="@_loading">
+                @if (_loading)
+                {
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span class="visually-hidden">Loading…</span>
+                }
+                else
+                {
+                    <span>Show</span>
+                }
+            </button>
+        </div>
+    </div>
+</form>
+
+@if (_error is not null)
+{
+    <ErrorAlert Error="_error" />
+}
+
+@if (_history is not null)
+{
+    @if (_history.Prices.Count == 0)
+    {
+        <div class="alert alert-info" role="status">
+            No persisted prices for @_history.Instrument between @DisplayFormat.Timestamp(_history.From)
+            and @DisplayFormat.Timestamp(_history.To).
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Time point (UTC)</th>
+                        <th scope="col" class="text-end">Aggregated</th>
+                        @foreach (var source in _sourceNames)
+                        {
+                            <th scope="col" class="text-end">@source</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var price in _history.Prices)
+                    {
+                        <tr>
+                            <td>@DisplayFormat.Timestamp(price.Timestamp)</td>
+                            <td class="text-end fw-semibold">@DisplayFormat.Price(price.Price)</td>
+                            @foreach (var source in _sourceNames)
+                            {
+                                var sourcePrice = price.Sources.FirstOrDefault(s => s.Source == source);
+                                <td class="text-end">@(sourcePrice is null ? "—" : DisplayFormat.Price(sourcePrice.Price))</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private string _instrument = "BTC/USD";
+    private DateTimeOffset _to = DisplayFormat.LastClosedHour(DateTimeOffset.UtcNow);
+    private DateTimeOffset _from = DisplayFormat.LastClosedHour(DateTimeOffset.UtcNow).AddDays(-1);
+    private bool _loading;
+    private ApiError? _error;
+    private PriceHistoryResponse? _history;
+    private IReadOnlyList<string> _sourceNames = [];
+
+    private async Task SubmitAsync()
+    {
+        _history = null;
+        _error = Validate();
+        if (_error is not null)
+        {
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            var response = await Api.GetHistoryAsync(_instrument, _from, _to);
+            if (response.IsSuccess)
+            {
+                _history = response.Value;
+                _sourceNames = _history.Prices.SelectMany(p => p.Sources).Select(s => s.Source).Distinct().Order().ToList();
+            }
+            else
+            {
+                _error = response.Error;
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private ApiError? Validate()
+    {
+        if (string.IsNullOrWhiteSpace(_instrument))
+        {
+            return new ApiError("Instrument is required", "Select or enter an instrument (BTC/USD)");
+        }
+
+        if (_from > _to)
+        {
+            return new ApiError("Invalid range", "From must not be after To");
+        }
+
+        return null;
+    }
+}

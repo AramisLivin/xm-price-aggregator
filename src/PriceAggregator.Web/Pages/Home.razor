@@ -1,7 +1,94 @@
-﻿@page "/"
+@page "/"
+@inject PriceApiClient Api
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Price lookup</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Price lookup</h1>
+<p class="text-body-secondary">
+    Aggregated close price of the hourly candle that ends at the selected time point.
+</p>
 
-Welcome to your new app.
+<form class="card card-body mb-4" @onsubmit="SubmitAsync">
+    <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+            <InstrumentInput Id="instrument" @bind-Value="_instrument" />
+        </div>
+        <div class="col-lg-6">
+            <UtcHourInput Id="timestamp" Label="Time point" @bind-Value="_timestamp" />
+        </div>
+        <div class="col-lg-2 d-grid">
+            <button type="submit" class="btn btn-primary" disabled="@_loading">
+                @if (_loading)
+                {
+                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                    <span>Loading…</span>
+                }
+                else
+                {
+                    <span>Get price</span>
+                }
+            </button>
+        </div>
+    </div>
+</form>
+
+@if (_error is not null)
+{
+    <ErrorAlert Error="_error" />
+}
+
+@if (_result is not null)
+{
+    <PriceResultCard Price="_result" />
+}
+
+@code {
+    private string _instrument = "BTC/USD";
+    private DateTimeOffset _timestamp = DisplayFormat.LastClosedHour(DateTimeOffset.UtcNow);
+    private bool _loading;
+    private ApiError? _error;
+    private AggregatedPriceResponse? _result;
+
+    private async Task SubmitAsync()
+    {
+        _result = null;
+        _error = Validate();
+        if (_error is not null)
+        {
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            var response = await Api.GetPriceAsync(_instrument, _timestamp);
+            if (response.IsSuccess)
+            {
+                _result = response.Value;
+            }
+            else
+            {
+                _error = response.Error;
+            }
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private ApiError? Validate()
+    {
+        if (string.IsNullOrWhiteSpace(_instrument))
+        {
+            return new ApiError("Instrument is required", "Select or enter an instrument (BTC/USD)");
+        }
+
+        if (_timestamp > DateTimeOffset.UtcNow)
+        {
+            return new ApiError("Time point is in the future", "Select an hour that has already closed");
+        }
+
+        return null;
+    }
+}
