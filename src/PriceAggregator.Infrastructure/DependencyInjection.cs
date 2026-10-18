@@ -24,6 +24,9 @@ public static class DependencyInjection
         return services;
     }
 
+    public static IHealthChecksBuilder AddInfrastructureHealthChecks(this IHealthChecksBuilder builder) =>
+        builder.AddDbContextCheck<PriceDbContext>("database");
+
     public static async Task MigratePriceDatabaseAsync(this IServiceProvider services)
     {
         await using var scope = services.CreateAsyncScope();
