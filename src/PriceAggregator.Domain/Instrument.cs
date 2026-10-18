@@ -36,6 +36,11 @@ public sealed record Instrument
         return true;
     }
 
+    public static Instrument Parse(string value) =>
+        TryParse(value, out var instrument)
+            ? instrument
+            : throw new FormatException($"Invalid instrument '{value}', expected BASE/QUOTE (BTC/USD)");
+
     public override string ToString() => Symbol;
 
     private static bool IsValidAsset(string asset) => asset.Length >= 2 && asset.All(char.IsAsciiLetterOrDigit);

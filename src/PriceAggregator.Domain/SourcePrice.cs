@@ -7,7 +7,7 @@ public sealed record SourcePrice
         ArgumentException.ThrowIfNullOrWhiteSpace(source);
         if (!double.IsFinite(price) || price <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(price), price, "Price is a finite number");
+            throw new ArgumentOutOfRangeException(nameof(price), price, "Price must be positive and finite");
         }
 
         Source = source;

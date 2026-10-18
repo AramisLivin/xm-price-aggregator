@@ -7,7 +7,7 @@ public sealed class AveragePriceAggregationStrategy : IPriceAggregationStrategy
         ArgumentNullException.ThrowIfNull(prices);
         if (prices.Count == 0)
         {
-            throw new ArgumentException("Cant aggregate an empty set", nameof(prices));
+            throw new ArgumentException("Cannot aggregate an empty set", nameof(prices));
         }
 
         return prices.Average(p => p.Price);
