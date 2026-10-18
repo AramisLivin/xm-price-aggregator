@@ -1,0 +1,21 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/PriceAggregator.Api/Dockerfile
+    ports:
+      - "5229:8080"
+    volumes:
+      - prices-data:/app/data
+
+  web:
+    build:
+      context: .
+      dockerfile: src/PriceAggregator.Web/Dockerfile
+    ports:
+      - "5299:80"
+    depends_on:
+      - api
+
+volumes:
+  prices-data:
