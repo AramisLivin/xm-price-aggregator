@@ -11,4 +11,8 @@
     <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="PriceAggregator.IntegrationTests" />
+  </ItemGroup>
+
 </Project>

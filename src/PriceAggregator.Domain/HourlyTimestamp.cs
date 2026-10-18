@@ -21,7 +21,7 @@ public readonly record struct HourlyTimestamp
         return true;
     }
 
-    private static HourlyTimestamp Create(DateTimeOffset value) =>
+    public static HourlyTimestamp Create(DateTimeOffset value) =>
         TryCreate(value, out var result)
             ? result
             : throw new ArgumentException($"Timestamp {value:O} is not a whole hour", nameof(value));

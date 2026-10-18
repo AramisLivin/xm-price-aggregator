@@ -35,12 +35,12 @@ internal sealed class BitfinexPriceSource(HttpClient httpClient) : IPriceSource
         return ParseClosePrice(document.RootElement, openTime);
     }
 
-    private static string ToSymbol(Instrument instrument) =>
+    public static string ToSymbol(Instrument instrument) =>
         instrument.BaseAsset.Length > 3 || instrument.QuoteAsset.Length > 3
             ? $"t{instrument.BaseAsset}:{instrument.QuoteAsset}"
             : $"t{instrument.BaseAsset}{instrument.QuoteAsset}";
 
-    private static decimal? ParseClosePrice(JsonElement root, long openTime)
+    public static decimal? ParseClosePrice(JsonElement root, long openTime)
     {
         if (root.ValueKind != JsonValueKind.Array)
         {

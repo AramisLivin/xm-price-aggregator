@@ -4,12 +4,12 @@ namespace PriceAggregator.Web.Services;
 
 internal sealed class ApiResult<T>
 {
-    internal ApiResult(T value)
+    public ApiResult(T value)
     {
         Value = value;
     }
 
-    internal ApiResult(ApiError error)
+    public ApiResult(ApiError error)
     {
         Error = error;
     }
