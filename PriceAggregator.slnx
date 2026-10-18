@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PriceAggregator.Api/PriceAggregator.Api.csproj" />
+    <Project Path="src/PriceAggregator.Application/PriceAggregator.Application.csproj" />
+    <Project Path="src/PriceAggregator.Contracts/PriceAggregator.Contracts.csproj" />
+    <Project Path="src/PriceAggregator.Domain/PriceAggregator.Domain.csproj" />
+    <Project Path="src/PriceAggregator.Infrastructure/PriceAggregator.Infrastructure.csproj" />
+    <Project Path="src/PriceAggregator.Web/PriceAggregator.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PriceAggregator.IntegrationTests/PriceAggregator.IntegrationTests.csproj" />
+    <Project Path="tests/PriceAggregator.UnitTests/PriceAggregator.UnitTests.csproj" />
+  </Folder>
+</Solution>
